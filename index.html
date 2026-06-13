@@ -1028,13 +1028,63 @@ function dispatchWA(formatType) {
         textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'B') {
-        // Menggunakan safeNumber agar data strip "-" atau kosong dikonversi ke angka 0
-        const crew = safeNumber(crewC) + safeNumber(crewFA) + safeNumber(crewEng);
-        const pax = safeNumber(paxA) + safeNumber(paxI) + safeNumber(paxC);
-        const pob = crew + pax;
+    // Fungsi pembersih lokal: Menghapus spasi, mendeteksi huruf/strip, dan mengubahnya menjadi angka 0 jika tidak valid
+    const cleanNum = (val) => {
+        if (!val) return 0;
+        const sanitized = val.toString().replace(/[^0-9]/g, ''); // Hanya ambil karakter angka 0-9
+        return sanitized === '' ? 0 : Number(sanitized);
+    };
 
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
-    }
+    // 1. Ambil nilai angka secara aman (Abaikan spasi, strip '-', atau tulisan 'NIL')
+    const crew = cleanNum(crewC) + cleanNum(crewFA) + cleanNum(crewEng);
+    const pax = cleanNum(paxA) + cleanNum(paxI) + cleanNum(paxC);
+    const pob = crew + pax;
+
+    // 2. Buat output teks format template MVT
+    textOutput = `\`\`\`
+DEP MVT
+${dateStr}
+${acReg}/${fltNum}
+AD  ${zAtd}/${zTo}
+EET ${eet} HRS
+EA  ${etaZStr} ${routeDest}
+CRW ${crew}
+PAX ${pax}
+POB ${pob}
+BGe ${cargoBge}
+CGo ${cargoCgo}
+FUEL UPLIFT ${fuelUplift}
+CPT ${pic}
+SI  ${si}
+END
+\`\`\``;
+}
+
+    // 1. Ambil nilai angka secara aman (Abaikan spasi, strip '-', atau tulisan 'NIL')
+    const crew = cleanNum(crewC) + cleanNum(crewFA) + cleanNum(crewEng);
+    const pax = cleanNum(paxA) + cleanNum(paxI) + cleanNum(paxC);
+    const pob = crew + pax;
+
+    // 2. Buat output teks format template MVT
+    textOutput = `\`\`\`
+DEP MVT
+${dateStr}
+${acReg}/${fltNum}
+AD  ${zAtd}/${zTo}
+EET ${eet} HRS
+EA  ${etaZStr} ${routeDest}
+CRW ${crew}
+PAX ${pax}
+POB ${pob}
+BGe ${cargoBge}
+CGo ${cargoCgo}
+FUEL UPLIFT ${fuelUplift}
+CPT ${pic}
+SI  ${si}
+END
+\`\`\``;
+}
+
     else if (formatType === 'C') {
         textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
