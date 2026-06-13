@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flight Data Log - Apron Mobile Premium</title>
+    <style>
+        :root {
+            --bg-color: #0b0b0b;
+            --card-bg: #141414;
+            --primary-orange: #ff7900;
+            --primary-hover: #e06a00;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-color: #2a2a2a;
+            --input-bg: #1e1e1e;
+            --whatsapp-green: #25D366;
+            --whatsapp-hover: #20ba56;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+            margin-bottom: 20px;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-orange);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--primary-orange);
+        }
+
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+        .col-4 { grid-column: span 4; }
+        .col-6 { grid-column: span 6; }
+        .col-8 { grid-column: span 8; }
+        .col-12 { grid-column: span 12; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #ff9800;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 14px 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Flight date input hybrid styles */
+        .date-picker-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .date-native-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .date-display-input {
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            background-color: var(--input-bg);
+        }
+
+        .time-trigger {
+            cursor: pointer;
+            background-color: #222222;
+            border: 1px solid #444;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+
+        .zoom-trigger {
+            cursor: pointer;
+        }
+
+        .route-side-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .sub-grid, .sub-grid-cargo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            width: 100%;
+        }
+        .sub-grid-cargo {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .timeline-section {
+            margin-top: 25px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        .timeline-header {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: var(--primary-orange);
+            text-align: center;
+        }
+
+        .timeline-row {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .activity-name {
+            font-size: 0.8rem;
+            color: #e0e0e0;
+            font-weight: 600;
+        }
+
+        .utc-display {
+            background: rgba(255, 121, 0, 0.05);
+            border: 1px solid rgba(255, 121, 0, 0.2);
+            padding: 14px 5px;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--primary-orange);
+            text-align: center;
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        .summary-box {
+            background-color: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .summary-item {
+            width: 100%;
+        }
+
+        .summary-item .val {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-orange);
+            font-family: monospace;
+            margin-top: 5px;
+        }
+
+        .eta-val {
+            font-size: 1.6rem !important;
+            color: #00e5ff !important;
+        }
+
+        /* MODALS */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 15px;
+        }
+
+        .apron-time-picker {
+            background-color: #1c1c1c;
+            border: 2px solid var(--primary-orange);
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+        }
+
+        .apron-picker-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--primary-orange);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-apron-now {
+            background-color: #333;
+            border: 2px solid #555;
+            color: #00ffcc;
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-apron-now:active {
+            background-color: #00ffcc;
+            color: #000;
+            border-color: #00ffcc;
+        }
+
+        .apron-time-engine {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .apron-time-input-big {
+            background: #000;
+            border: 2px solid var(--primary-orange);
+            color: #fff;
+            font-size: 3rem;
+            font-weight: 700;
+            width: 100px;
+            height: 80px;
+            text-align: center;
+            border-radius: 16px;
+            font-family: monospace;
+        }
+
+        .apron-colon {
+            font-size: 3rem;
+            font-weight: bold;
+            color: var(--primary-orange);
+        }
+
+        .wa-modal {
+            background-color: #1c1c1c;
+            border: 2px solid var(--whatsapp-green);
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+        }
+
+        .wa-option-btn {
+            background: #2b2b2b;
+            color: white;
+            border: 1px solid #444;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            width: 100%;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .wa-option-btn span {
+            background: var(--whatsapp-green);
+            color: black;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+        }
+
+        .zoom-card {
+            background-color: #1c1c1c;
+            border: 2px solid var(--primary-orange);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+        }
+        .zoom-card label {
+            font-size: 0.9rem;
+            color: var(--primary-orange);
+            margin-bottom: 12px;
+            display: block;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .zoom-card input {
+            font-size: 1.6rem;
+            padding: 14px;
+            background: #000;
+            border: 2px solid #444;
+            margin-bottom: 15px;
+        }
+
+        .suggestions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #0a0a0a;
+            border: 1px solid #333;
+            padding: 4px;
+        }
+
+        .suggestion-item {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: #eee;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .suggestion-item:hover, .suggestion-item.active {
+            background-color: var(--primary-orange);
+            color: #000;
+        }
+
+        .suggestion-match {
+            color: var(--primary-orange);
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .suggestion-item:hover .suggestion-match, .suggestion-item.active .suggestion-match {
+            color: #000;
+        }
+
+        .picker-footer {
+            display: flex;
+            gap: 12px;
+        }
+        .picker-footer button {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-picker-ok { background-color: var(--primary-orange); color: black; }
+        .btn-picker-cancel { background-color: #444; color: white; }
+
+        .action-footer {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-submit, .btn-whatsapp-main {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            border: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .btn-submit { background-color: var(--primary-orange); color: #000; }
+        .btn-whatsapp-main { background-color: var(--whatsapp-green); color: white; }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: #222;
+            color: #00ffcc;
+            border: 2px solid #00ffcc;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10000;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .grid-row { grid-template-columns: repeat(12, 1fr); gap: 10px; }
+           .col-2 { grid-column: span 4; }
+
+            .col-3 { grid-column: span 6; }
+            .col-4 { grid-column: span 12; }
+            .col-6 { grid-column: span 12; }
+            .col-8 { grid-column: span 12; }
+
+            .timeline-header { display: none; }
+            .timeline-row {
+                grid-template-columns: repeat(12, 1fr);
+                background: rgba(255,255,255,0.02);
+                padding: 10px;
+                border-radius: 10px;
+                border: 1px solid var(--border-color);
+            }
+            .activity-name { grid-column: span 12; text-align: left; margin-bottom: 4px; color: var(--primary-orange);}
+            .timeline-row div:nth-child(2) { grid-column: span 6; }
+            .timeline-row div:nth-child(3) { grid-column: span 6; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <form id="flightForm" onsubmit="event.preventDefault(); showToast('Data Log Saved Locally!');">
+        <div class="form-header">
+            <div class="form-title">STATION AIRCARAFT MOVEMENT</div>
+        </div>
+
+        <!-- WhatsApp Target Configuration Row -->
+        <div class="grid-row">
+			<div class="form-group col-6">
+				<label style="color: var(--ORANGE);">Station</label>
+				<input type="text" id="stationName" value="WSSL" class="zoom-trigger" style="border-color: var(--orange);">
+			</div>
+			<div class="form-group col-6">
+				<label style="color: var(--whatsapp-green);">WhatsApp Target Number</label>
+				<input type="text" id="waContact" value="6281335232100" class="zoom-trigger" style="border-color: var(--whatsapp-green);">
+			</div>
+        </div>
+
+        <!-- Row 1: Flight Date (8 columns) & UTC Offset (4 columns) -->
+        <div class="grid-row">
+            <div class="form-group col-3">
+                <label>Flight Date</label>
+                <div class="date-picker-wrapper">
+                    <input type="date" id="flightDate" class="date-native-input" onchange="handleDateSelect(this.value)" required>
+                    <input type="text" id="flightDateDisplay" class="date-display-input" placeholder="Select Date" >
+                </div>
+            </div>
+            <div class="form-group col-3">
+                <label>UTC</label>
+                <select id="utcOffset" onchange="calculateAllMetrics()">
+                    <option value="7" selected>UTC +7 (WIB)</option>
+                    <option value="8">UTC +8 (WITA)</option>
+                    <option value="9">UTC +9 (WIT)</option>
+                    <option value="0">UTC +0 (ZULU)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Row 2: A/C Reg (6 columns) & Flight Number (6 columns) side by side -->
+        <div class="grid-row">
+            <div class="form-group col-3">
+                <label>A/C Reg</label>
+                <input type="text" id="acReg" value="M-PTGG" class="zoom-trigger" readonly>
+            </div>
+            <div class="form-group col-3">
+                <label>Flt Number</label>
+                <input type="text" id="fltNumber" value="" class="zoom-trigger" readonly required>
+            </div>
+        </div>
+
+        <!-- Row 3: Route (8 columns) & EET (4 columns) -->
+        <div class="grid-row">
+            <div class="form-group col-3">
+                <label>Route (Origin - Dest)</label>
+                <div class="route-side-container">
+                    <input type="text" id="routeOrig" value="WSSL" class="zoom-trigger" readonly>
+                    <span style="color: var(--text-muted); font-weight:bold;">-</span>
+                    <input type="text" id="routeDest" value="WSSL" class="zoom-trigger" readonly>
+                </div>
+            </div>
+            <div class="form-group col-3">
+                <label>EET (HR:MIN)</label>
+                <input type="text" id="eetInput" class="time-trigger" value="--:--" readonly>
+            </div>
+        </div>
+
+        <!-- Row 4: Fuel, Parking, Pilot -->
+        <div class="grid-row">
+            <div class="form-group col-3">
+                <label>Fuel Uplift</label>
+                <input type="text" id="fuelUplift" value="NIL" class="zoom-trigger" readonly>
+            </div>
+            <div class="form-group col-3">
+                <label>Parking Stand</label>
+                <input type="text" id="prkStand" value="-" class="zoom-trigger" readonly>
+            </div>
+            <div class="form-group col-6">
+                <label>Pilot in Com (PIC)</label>
+                <input type="text" id="picName" value="-" class="zoom-trigger" readonly>
+            </div>
+        </div>
+
+        <!-- Row 5: Crew, PAX, Cargo grids -->
+        <div class="grid-row">
+            <div class="form-group col-4">
+                <label>Crew (C/FA/ENG)</label>
+                <div class="sub-grid">
+                    <input type="text" id="crewC" value="-" class="zoom-trigger" readonly>
+                    <input type="text" id="crewFa" value="-" class="zoom-trigger" readonly>
+                    <input type="text" id="crewEng" value="-" class="zoom-trigger" readonly>
+                </div>
+            </div>
+            <div class="form-group col-4">
+                <label>PAX (A/I/C)</label>
+                <div class="sub-grid">
+                    <input type="text" id="paxA" value="-" class="zoom-trigger" readonly>
+                    <input type="text" id="paxI" value="-" class="zoom-trigger" readonly>
+                    <input type="text" id="paxC" value="-" class="zoom-trigger" readonly>
+                </div>
+            </div>
+            <div class="form-group col-4">
+                <label>Cargo (BGE/CGO)</label>
+                <div class="sub-grid-cargo">
+                    <input type="text" id="cargoBge" value="-" class="zoom-trigger" readonly>
+                    <input type="text" id="cargoCgo" value="-" class="zoom-trigger" readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 6: Special Information -->
+        <div class="grid-row">
+            <div class="form-group col-12">
+                <label>Special Information (SI)</label>
+                <input type="text" id="siInfo" value="-" class="zoom-trigger" readonly>
+            </div>
+        </div>
+
+        <!-- Chronology Section -->
+        <div class="timeline-section">
+            <div class="timeline-header">
+                <div style="grid-column: span 12; text-align: left; padding-left: 5px;">Chronology & UTC Converter</div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="activity-name">1. LANDING</div>
+                <div><input type="text" id="time_landing" class="time-trigger lt-start" value="" readonly></div>
+                <div id="utc_landing" class="utc-display">-</div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="activity-name">2. ATA / BLOCK ON</div>
+                <div><input type="text" id="time_blockon" class="time-trigger lt-start" value="" readonly></div>
+                <div id="utc_blockon" class="utc-display">-</div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="activity-name">3. ATD / BLOCK OFF</div>
+                <div><input type="text" id="time_atd" class="time-trigger lt-start" value="" readonly></div>
+                <div id="utc_atd" class="utc-display">-</div>
+            </div>
+
+            <div class="timeline-row">
+                <div class="activity-name">4. AIRBORNE</div>
+                <div><input type="text" id="time_airborne" class="time-trigger lt-start" value="" readonly></div>
+                <div id="utc_airborne" class="utc-display">-</div>
+            </div>
+        </div>
+
+        <!-- Summary Section (Centered ETA based on Airborne + EET) -->
+        <div class="summary-box">
+            <div class="summary-item">
+                <label style="color:#00e5ff;">Estimated Landing / ETA (Airborne + EET)</label>
+                <div id="calcEstLanding" class="val eta-val">--:--</div>
+            </div>
+        </div>
+
+        <!-- Submission Controls -->
+        <div class="action-footer">
+            <button type="button" class="btn-whatsapp-main" onclick="openWhatsAppModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397 0 11.948 0c3.179.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.907-11.893 11.907-2.002-.001-3.972-.51-5.731-1.484L0 24zm6.59-4.846c1.657.983 3.284 1.513 4.903 1.515 5.358 0 9.713-4.329 9.716-9.65.002-2.578-1.002-5.002-2.83-6.83-1.829-1.829-4.254-2.831-6.835-2.832-5.352 0-9.709 4.331-9.712 9.652-.001 1.705.467 3.371 1.354 4.845l-.993 3.63 3.73-.978zm11.524-4.945c-.292-.146-1.727-.852-1.996-.95-.269-.098-.465-.146-.662.146-.197.293-.763.95-.935 1.146-.171.195-.343.219-.635.073-.292-.146-1.234-.455-2.351-1.452-.869-.775-1.456-1.732-1.627-2.024-.171-.293-.018-.451.128-.596.132-.131.292-.342.438-.513.146-.171.195-.293.292-.488.097-.195.049-.366-.024-.513-.073-.146-.662-1.597-.907-2.187-.239-.574-.483-.497-.662-.506-.171-.007-.367-.008-.562-.008-.195 0-.513.073-.78.366-.269.293-1.025 1.001-1.025 2.441 0 1.439 1.049 2.83 1.196 3.025.146.195 2.064 3.151 5.001 4.415.699.301 1.244.481 1.669.616.703.224 1.343.193 1.85.117.564-.085 1.727-.707 1.972-1.39.244-.683.244-1.269.171-1.39-.073-.122-.269-.195-.561-.341z"/></svg>
+                SEND DISPATCH VIA WHATSAPP
+            </button>
+            <button type="submit" class="btn-submit">SAVE DATA LOG</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal 1: Premium Custom Time Picker -->
+<div id="timePickerModal" class="modal-overlay">
+    <div class="apron-time-picker">
+        <div class="apron-picker-title">Select Time (HH:MM)</div>
+        
+        <button type="button" class="btn-apron-now" onclick="setApronTimeToNow()">Set Current Time</button>
+
+        <div class="apron-time-engine">
+            <input type="text" id="apronHour" class="apron-time-input-big" maxlength="2" placeholder="00" onfocus="this.select()">
+            <div class="apron-colon">:</div>
+            <input type="text" id="apronMinute" class="apron-time-input-big" maxlength="2" placeholder="00" onfocus="this.select()">
+        </div>
+
+        <div class="picker-footer">
+            <button type="button" class="btn-picker-cancel" onclick="closeApronPicker()">Cancel</button>
+            <button type="button" class="btn-picker-ok" onclick="saveApronPicker()">SAVE</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Zoom Input Modal with Auto-filtering Suggestion Dropdown -->
+<div id="zoomInputModal" class="modal-overlay">
+    <div class="zoom-card">
+        <label id="zoomModalLabel">Input Details</label>
+        
+        <!-- Input handles manual typing in real-time -->
+        <input type="text" id="zoomModalInput" autocomplete="off" placeholder="Type custom or select below...">
+        
+        <!-- Smart dropdown suggestions dynamically render list elements here -->
+        <div id="suggestionsWrapper" class="suggestions-container" style="display: none;"></div>
+
+        <div class="picker-footer">
+            <button type="button" class="btn-picker-cancel" onclick="closeZoomModal()">Cancel</button>
+            <button type="button" class="btn-picker-ok" onclick="saveZoomModal()">APPLY</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: WhatsApp Action Modal -->
+<div id="waModal" class="modal-overlay">
+    <div class="wa-modal">
+        <div class="apron-picker-title" style="color: var(--whatsapp-green);">Choose Dispatch Format</div>
+        <p style="font-size:0.75rem; color:#aaa; margin-bottom:15px; text-align:center;">To: <b id="waTargetLabel"></b></p>
+        
+        <button type="button" class="wa-option-btn" onclick="dispatchWA('A')">A. ARR MVT <span>ARRIVAL</span></button>
+        <button type="button" class="wa-option-btn" onclick="dispatchWA('B')">B. DEP MVT <span>OPERATOR</span></button>
+        <button type="button" class="wa-option-btn" onclick="dispatchWA('C')">C. DEP MVT <span>GROUP</span></button>
+
+        <div class="picker-footer" style="margin-top:15px;">
+            <button type="button" class="btn-picker-cancel" style="width:100%;" onclick="closeWAModal()">CLOSE</button>
+        </div>
+    </div>
+</div>
+
+<!-- Premium floating alert banner -->
+<div id="toastNotification" class="toast">Data Log Saved!</div>
+
+
+<script>
+let activeInputTarget = null;
+    const suggestionsData = {
+        'acReg': ['MPTGG', 'T758GH', 'VPCLL', 'PKKAS'],
+        'picName': ['ANDREAS SCHMITZ', 'ANDRE GAZOLLA EGOROV', 'CHEVALLIER HERVE MATHIEU'],
+        'routeOrig': ['WSSL', 'WSSS', 'WIHH', 'WIII', 'WARQ', 'WARR'],
+        'routeDest': ['WSSL', 'WSSS', 'WIHH', 'WIII', 'WARQ', 'WARR'],
+        'fuelUplift': ['NIL'], 'paxA': ['NIL'], 'paxI': ['NIL'], 'paxC': ['NIL'],
+        'cargoBge': ['NIL'], 'cargoCgo': ['NIL'], 'siInfo': ['NIL'],
+		'stationName' : ['KOE (Kupang)', 'LBJ (Labuan Bajo)', 'WGP (Waingapu)', 
+		'ENE (Ende)', 'LWE (Lewoleba)', 'ARD (Alor)', 'MOF (Maumere)', 'TMC (Tambolaka)', 
+		'LKA (Larantuka)', 'BJW (Bajawa)', 'RTI (Rote)', 'ABU (Atambua)', 'DHX (Dhoho Kediri)']
+
+    };
+
+    const timePickerModal = document.getElementById('timePickerModal');
+    const zoomInputModal = document.getElementById('zoomInputModal');
+    const waModal = document.getElementById('waModal');
+    const zoomModalInput = document.getElementById('zoomModalInput');
+    const suggestionsWrapper = document.getElementById('suggestionsWrapper');
+    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+    window.onload = function() {
+        setDefaultDate();
+        calculateAllMetrics();
+        setupZoomMechanics();
+    };
+
+    function showToast(message) {
+        const toast = document.getElementById('toastNotification');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+
+    // Formats any raw 'YYYY-MM-DD' into beautiful 'DD MMM YYYY'
+    function formatDateToMnemonic(isoString) {
+        if (!isoString) return "";
+        const parts = isoString.split('-');
+        if (parts.length !== 3) return "";
+        const yyyy = parts[0];
+        const mm = parseInt(parts[1]) - 1;
+        const dd = parts[2];
+        return `${dd} ${monthNames[mm]} ${yyyy}`;
+    }
+
+    function setDefaultDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+
+        const isoDate = `${yyyy}-${mm}-${dd}`;
+        document.getElementById('flightDate').value = isoDate;
+        document.getElementById('flightDateDisplay').value = formatDateToMnemonic(isoDate);
+
+        // Auto-run flight generation
+        updateDefaultFlightNumber();
+    }
+
+    // Handles the selection of a date in the hidden native picker
+    function handleDateSelect(val) {
+		if (!val) return; // Guard clause
+        // 1. Update the display input visually
+			document.getElementById('flightDateDisplay').value = formatDateToMnemonic(val);
+    
+    // 2. Ensure the hidden native input value is actually set
+			document.getElementById('flightDate').value = val;
+    
+    // 3. Trigger secondary updates
+			updateDefaultFlightNumber();
+			calculateAllMetrics();
+    }
+
+    // Auto generates flight number inside standard: [Day].[ACRegCleaned]
+    function updateDefaultFlightNumber() {
+        const dInput = document.getElementById('flightDate').value;
+        const acRegVal = document.getElementById('acReg').value;
+        if (!dInput) return;
+
+        // Extract day
+        const dayStr = dInput.split('-')[2];
+
+        // Clean AC Reg (Keep alphanumeric uppercase values only)
+        const acRegCleaned = acRegVal.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+
+        // Form standard Flight No (e.g., 04.MPTGG)
+        document.getElementById('fltNumber').value = `${dayStr}.${acRegCleaned}`;
+    }
+
+    function setupZoomMechanics() {
+        // Listen to zoom-trigger clicks to open modal
+        document.querySelectorAll('.zoom-trigger').forEach(input => {
+            input.addEventListener('click', function() {
+                activeInputTarget = this;
+                const fieldId = this.id;
+                const labelText = this.closest('.form-group')?.querySelector('label')?.textContent || "Data Field";
+
+                zoomModalLabel.textContent = `${labelText}`;
+                zoomModalInput.value = this.value;
+
+                // Initialize and filter suggestion hints
+                renderSuggestions(this.value);
+
+                zoomInputModal.style.display = 'flex';
+                setTimeout(() => { zoomModalInput.focus(); zoomModalInput.select(); }, 150);
+            });
+        });
+
+        // Live input keystroke listener for dynamic autocompleting list
+        zoomModalInput.addEventListener('input', function() {
+            renderSuggestions(this.value);
+        });
+    }
+
+    // Dynamically builds and displays matching hints list inside the modal dropdown
+    function renderSuggestions(query = '') {
+        suggestionsWrapper.innerHTML = '';
+        const fieldId = activeInputTarget ? activeInputTarget.id : null;
+
+        // If field has no preset dataset, hide the dropdown container entirely
+        if (!fieldId || !suggestionsData[fieldId]) {
+            suggestionsWrapper.style.display = 'none';
+            return;
+        }
+
+        const items = suggestionsData[fieldId];
+
+        // Filter elements based on query string
+        const filtered = items.filter(item =>
+            item.toLowerCase().includes(query.toLowerCase())
+        );
+
+        // Hide if no suggestions match
+        if (filtered.length === 0) {
+            suggestionsWrapper.style.display = 'none';
+            return;
+        }
+
+        suggestionsWrapper.style.display = 'flex';
+
+        filtered.forEach(val => {
+            const rowItem = document.createElement('div');
+            rowItem.className = 'suggestion-item';
+
+            // Visual Highlight matches
+            if (query) {
+                const idx = val.toLowerCase().indexOf(query.toLowerCase());
+                if (idx !== -1) {
+                    const before = val.substring(0, idx);
+                    const match = val.substring(idx, idx + query.length);
+                    const after = val.substring(idx + query.length);
+                    rowItem.innerHTML = `${before}<span class="suggestion-match">${match}</span>${after}`;
+                } else {
+                    rowItem.textContent = val;
+                }
+            } else {
+                rowItem.textContent = val;
+            }
+
+            // Quick select click action
+            rowItem.onclick = function() {
+                zoomModalInput.value = val;
+                saveZoomModal();
+            };
+
+            suggestionsWrapper.appendChild(rowItem);
+        });
+    }
+
+    function closeZoomModal() {
+        zoomInputModal.style.display = 'none';
+        activeInputTarget = null;
+    }
+
+    function saveZoomModal() {
+        if (activeInputTarget) {
+            activeInputTarget.value = zoomModalInput.value.toUpperCase();
+
+            // If AC Reg changed, trigger Flight Number regeneration
+            if (activeInputTarget.id === 'acReg') {
+                updateDefaultFlightNumber();
+            }
+
+            calculateAllMetrics();
+            closeZoomModal();
+        }
+    }
+
+    document.querySelectorAll('.time-trigger').forEach(input => {
+        input.addEventListener('click', function() {
+            activeInputTarget = this;
+            let [h, m] = (this.value === '--' || this.value === '') ? ['00', '00'] : this.value.split(':');
+            document.getElementById('apronHour').value = h;
+            document.getElementById('apronMinute').value = m;
+            timePickerModal.style.display = 'flex';
+        });
+    });
+
+    function setApronTimeToNow() {
+        const now = new Date();
+        apronHour.value = String(now.getHours()).padStart(2, '0');
+        apronMinute.value = String(now.getMinutes()).padStart(2, '0');
+    }
+
+    function closeApronPicker() {
+        timePickerModal.style.display = 'none';
+        activeInputTarget = null;
+    }
+
+    function saveApronPicker() {
+        if (activeInputTarget) {
+            let h = document.getElementById('apronHour').value.padStart(2, '0');
+            let m = document.getElementById('apronMinute').value.padStart(2, '0');
+
+            if (parseInt(h) >= 0 && parseInt(h) <= 23 && parseInt(m) >= 0 && parseInt(m) <= 59) {
+                activeInputTarget.value = `${h}:${m}`;
+                calculateAllMetrics();
+                closeApronPicker();
+            } else {
+                showToast("Please enter a valid time (00-23 : 00-59)");
+            }
+        }
+    }
+
+    function parseToMinutes(timeStr) {
+        if(!timeStr || timeStr === '--') return null;
+        const [h, m] = timeStr.split(':').map(Number);
+        return (h * 60) + m;
+    }
+
+    function formatMinutesToHoursStr(totalMinutes) {
+        totalMinutes = ((totalMinutes % 1440) + 1440) % 1440;
+        const h = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+        const m = String(totalMinutes % 60).padStart(2, '0');
+        return `${h}:${m}`;
+    }
+
+    function calculateAllMetrics() {
+        const offset = parseInt(document.getElementById('utcOffset').value) || 0;
+
+        document.querySelectorAll('.timeline-row').forEach(row => {
+            const startInput = row.querySelector('.lt-start').value;
+            const utcDisplay = row.querySelector('.utc-display');
+            if (!startInput || startInput === '--') {
+                utcDisplay.textContent = "-";
+                return;
+            }
+            let localMinutes = parseToMinutes(startInput);
+            let utcMinutes = localMinutes - (offset * 60);
+
+            // WEB UI: keep the colon here
+            utcDisplay.textContent = formatMinutesToHoursStr(utcMinutes) + "Z";
+        });
+
+        // ETA calculation updated to: Airborne Time + EET
+        const airborne = parseToMinutes(document.getElementById('time_airborne').value);
+        const eet = parseToMinutes(document.getElementById('eetInput').value);
+
+        if (airborne !== null && eet !== null) {
+            let estLandingMinutesLT = airborne + eet;
+            let estLandingMinutesUTC = estLandingMinutesLT - (offset * 60);
+
+            // WEB UI: keep the colon here
+            let utcStr = formatMinutesToHoursStr(estLandingMinutesUTC) + "Z";
+            document.getElementById('calcEstLanding').textContent = `${utcStr}`;
+        } else {
+            document.getElementById('calcEstLanding').textContent = "--:--";
+        }
+    }
+
+    function openWhatsAppModal() {
+        document.getElementById('waTargetLabel').textContent = "+" + document.getElementById('waContact').value;
+        waModal.style.display = 'flex';
+    }
+
+    function closeWAModal() { waModal.style.display = 'none'; }
+
+    function getFormattedDateString() {
+        const dInput = document.getElementById('flightDate').value;
+        if(!dInput) return "04 JUN 2026";
+        const [yyyy, mm, dd] = dInput.split('-');
+        return `${dd} ${monthNames[parseInt(mm)-1]} ${yyyy}`;
+    }
+
+    function dispatchWA(formatType) {
+        const waNum = document.getElementById('waContact').value;
+        const dateStr = getFormattedDateString();
+        const acReg = document.getElementById('acReg').value;
+        const fltNum = document.getElementById('fltNumber').value;
+
+        // WHATSAPP REPORT: Remove colons from these fields by using .replace(':', '')
+        const zLanding = document.getElementById('utc_landing').textContent.replace(':', '');
+        const zBlockOn = document.getElementById('utc_blockon').textContent.replace(':', '');
+        const zAtd = document.getElementById('utc_atd').textContent.replace(':', '');
+		const ltAtd = document.getElementById('time_atd').value.replace(':', '');
+		const zTo = document.getElementById('utc_airborne').textContent.replace(':', '');
+		const ltTo = document.getElementById('time_airborne').textContent.replace(':', '');
+        const eet = document.getElementById('eetInput').value.replace(':', '');
+
+        const prkStand = document.getElementById('prkStand').value;
+        const routeDest = document.getElementById('routeDest').value;
+        const crewC = document.getElementById('crewC').value;
+        const paxA = document.getElementById('paxA').value;
+        const cargoBge = document.getElementById('cargoBge').value;
+        const cargoCgo = document.getElementById('cargoCgo').value;
+        const fuelUplift = document.getElementById('fuelUplift').value;
+        const pic = document.getElementById('picName').value;
+        const si = document.getElementById('siInfo').value;
+
+        // ETA calculation
+        const eetMinutes = parseToMinutes(document.getElementById('eetInput').value) || 0;
+        const airborneMinutes = parseToMinutes(document.getElementById('time_airborne').value) || 0;
+        const offset = parseInt(document.getElementById('utcOffset').value) || 0;
+
+        let etaMinutesLT = airborneMinutes + eetMinutes;
+        let etaMinutesZ = etaMinutesLT - (offset * 60);
+
+        // WHATSAPP REPORT: Remove colons from ETA fields
+        let etaZStr = formatMinutesToHoursStr(etaMinutesZ).replace(':', '') + "Z";
+        let etaLTStr = formatMinutesToHoursStr(etaMinutesLT).replace(':', '') + "LT";
+
+        let textOutput = "";
+
+        // Single line spacing (with backticks for monospace in WhatsApp)
+        if (formatType === 'A') {
+            textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI ACFT STAND ${prkStand}\nEND\n\`\`\``;
+        }
+        else if (formatType === 'B') {
+            textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crewC}\nPAX ${paxA}\nPOB ${crewC}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+        }
+        else if (formatType === 'C') {
+            textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        }
+
+	const payload = {
+        date: getFormattedDateString(),
+        acReg: acReg,
+        fltDate: dateStr,
+        report: textOutput // This sends the exact text you generated for WhatsApp
+    };
+
+    // 2. Send to Google Sheets
+    // Replace 'YOUR_WEB_APP_URL' with the URL from your Google Apps Script deployment
+	const scriptURL = 'https://script.google.com/macros/s/AKfycbxwOr1S1KR_5D9Jn6TF7DNtTCpTXMuByhTGGO4mnQ64DFbEoRz2W__cn9G-NF88a0Bl/exec'; 
+
+	fetch(scriptURL, {
+		method: 'POST',
+		mode: 'no-cors', // Penting agar tidak terkena error CORS
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload)
+	})
+	.then(response => console.log("Data terkirim ke Sheet"))
+	.catch(err => console.error("Sheet Error: ", err));
+    // 3. Open WhatsApp and close modal
+    window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(textOutput)}`, '_blank');
+    closeWAModal();
+
+    // Modern custom toast alerts
+    function showToast(message) {
+        const toast = document.getElementById('toastNotification');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    window.addEventListener('click', function(e) {
+        if (e.target === timePickerModal) closeApronPicker();
+        if (e.target === zoomInputModal) closeZoomModal();
+        if (e.target === waModal) closeWAModal();
+    });
+
+
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMsg = document.getElementById('statusMsg');
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+
+            // UI State: Loading
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Sending...';
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+
+            fetch(scriptURL, {
+                method: 'POST',
+                body: params,
+                mode: 'no-cors' // Google Apps Script requires this for cross-origin
+            })
+            .then(() => {
+                statusMsg.textContent = "Message sent successfully!";
+                statusMsg.className = "mt-4 p-3 rounded-lg text-center font-medium bg-green-100 text-green-700 block";
+                form.reset();
+            })
+            .catch(error => {
+                statusMsg.textContent = "Something went wrong. Please try again.";
+                statusMsg.className = "mt-4 p-3 rounded-lg text-center font-medium bg-red-100 text-red-700 block";
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Send Message';
+            });
+        });
+}
+</script>
+</body>
+</html>
