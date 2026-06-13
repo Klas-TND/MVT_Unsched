@@ -1028,7 +1028,7 @@ let activeInputTarget = null;
         const prkStand = document.getElementById('prkStand').value;
         const routeDest = document.getElementById('routeDest').value;
         const crewC = document.getElementById('crewC').value;
-		const crewFA = document.getElementById('crewFA').value;
+		const crewFa = document.getElementById('crewFa').value;
 		const crewEng = document.getElementById('crewEng').value;
         const paxA = document.getElementById('paxA').value;
 		const paxI = document.getElementById('paxI').value;
@@ -1060,7 +1060,7 @@ let activeInputTarget = null;
         }
         else if (formatType === 'B') {
     // 1. Konversi ke Number dan Jumlahkan untuk menghindari error penggabungan string
-    const crew = Number(crewC || 0) + Number(crewFA || 0) + Number(crewEng || 0);
+    const crew = Number(crewC || 0) + Number(crewFa || 0) + Number(crewEng || 0);
     const pax = Number(paxA || 0) + Number(paxI || 0) + Number(paxC || 0);
     const pob = crew + pax;
 
