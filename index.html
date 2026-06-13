@@ -747,6 +747,7 @@ const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP
 
 window.onload = function() {
     setDefaultDate();
+	setDefaultTime();
     calculateAllMetrics();
     setupZoomMechanics();
 };
@@ -800,6 +801,7 @@ function updateDefaultFlightNumber() {
     const acRegCleaned = acRegVal.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     document.getElementById('fltNumber').value = `${dayStr}.${acRegCleaned}`;
 }
+
 
 function setupZoomMechanics() {
     document.querySelectorAll('.zoom-trigger').forEach(input => {
