@@ -1024,69 +1024,41 @@ function dispatchWA(formatType) {
 
     let textOutput = "";
 
+        // --- TARUH INI DI DALAM DISPATCHWA SEBELUM BLOK IF (FORMATTYPE) ---
+    // Pendekatan: Mengambil angka saja. Jika bukan angka, otomatis dianggap 0
+    const penjumblahM = (val) => {
+        if (!val) return 0;
+        // Buang semua karakter yang BUKAN angka (seperti "-", "NIL", spasi, dll)
+        const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
+        // Jika kosong kembalikan 0, jika ada angka konversi ke tipe Number
+        return hanyaAngka === '' ? 0 : Number(hanyaAngka);
+    };
+
+    // Hitung total crew, pax, dan pob secara aman menggunakan fungsi di atas
+    // Pastikan ID 'crewFa' menggunakan huruf 'a' kecil sesuai di HTML Anda
+    const crew = penjumblahM(document.getElementById('crewC')?.value) + 
+                 penjumblahM(document.getElementById('crewFa')?.value) + 
+                 penjumblahM(document.getElementById('crewEng')?.value);
+
+    const pax = penjumblahM(document.getElementById('paxA')?.value) + 
+                penjumblahM(document.getElementById('paxI')?.value) + 
+                penjumblahM(document.getElementById('paxC')?.value);
+
+    const pob = crew + pax;
+    // -----------------------------------------------------------------
+
+
+    // --- EDIT BLOK KODE IF FORMAT DI BAWAHNYA MENJADI SEPERTI INI ---
     if (formatType === 'A') {
         textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'B') {
-    // Fungsi pembersih lokal: Menghapus spasi, mendeteksi huruf/strip, dan mengubahnya menjadi angka 0 jika tidak valid
-    const cleanNum = (val) => {
-        if (!val) return 0;
-        const sanitized = val.toString().replace(/[^0-9]/g, ''); // Hanya ambil karakter angka 0-9
-        return sanitized === '' ? 0 : Number(sanitized);
-    };
-
-    // 1. Ambil nilai angka secara aman (Abaikan spasi, strip '-', atau tulisan 'NIL')
-    const crew = cleanNum(crewC) + cleanNum(crewFA) + cleanNum(crewEng);
-    const pax = cleanNum(paxA) + cleanNum(paxI) + cleanNum(paxC);
-    const pob = crew + pax;
-
-    // 2. Buat output teks format template MVT
-    textOutput = `\`\`\`
-DEP MVT
-${dateStr}
-${acReg}/${fltNum}
-AD  ${zAtd}/${zTo}
-EET ${eet} HRS
-EA  ${etaZStr} ${routeDest}
-CRW ${crew}
-PAX ${pax}
-POB ${pob}
-BGe ${cargoBge}
-CGo ${cargoCgo}
-FUEL UPLIFT ${fuelUplift}
-CPT ${pic}
-SI  ${si}
-END
-\`\`\``;
-}
-
-    // 1. Ambil nilai angka secara aman (Abaikan spasi, strip '-', atau tulisan 'NIL')
-    const crew = cleanNum(crewC) + cleanNum(crewFA) + cleanNum(crewEng);
-    const pax = cleanNum(paxA) + cleanNum(paxI) + cleanNum(paxC);
-    const pob = crew + pax;
-
-    // 2. Buat output teks format template MVT
-    textOutput = `\`\`\`
-DEP MVT
-${dateStr}
-${acReg}/${fltNum}
-AD  ${zAtd}/${zTo}
-EET ${eet} HRS
-EA  ${etaZStr} ${routeDest}
-CRW ${crew}
-PAX ${pax}
-POB ${pob}
-BGe ${cargoBge}
-CGo ${cargoCgo}
-FUEL UPLIFT ${fuelUplift}
-CPT ${pic}
-SI  ${si}
-END
-\`\`\``;
-}
-
+        // Menggunakan variabel crew, pax, dan pob yang sudah dihitung di atas
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+    }
     else if (formatType === 'C') {
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
 
     const payload = {
