@@ -1054,7 +1054,7 @@ function dispatchWA(formatType) {
     }
     else if (formatType === 'B') {
         // Menggunakan variabel crew, pax, dan pob yang sudah dihitung di atas
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'C') {
         // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
