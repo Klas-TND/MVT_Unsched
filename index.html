@@ -1051,7 +1051,7 @@ let activeInputTarget = null;
 
         // Single line spacing (with backticks for monospace in WhatsApp)
         if (formatType === 'A') {
-            textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI ACFT STAND ${prkStand}\nEND\n\`\`\``;
+            textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI STND ${prkStand} ${si}\nEND\n\`\`\``;
         }
         else if (formatType === 'B') {
             textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crewC}\nPAX ${paxA}\nPOB ${crewC}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
