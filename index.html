@@ -569,7 +569,7 @@
         <!-- Row 4: Fuel, Parking, Pilot -->
         <div class="grid-row">
             <div class="form-group col-3">
-                <label>Fuel Uplift</label>
+                <label>Fuel Uplift (ltr)</label>
                 <input type="text" id="fuelUplift" value="NIL" class="zoom-trigger" readonly>
             </div>
             <div class="form-group col-3">
@@ -1054,34 +1054,43 @@ let activeInputTarget = null;
 
         let textOutput = "";
 
-/// 2. FUNGSI PENJUMLAHAN AMAN
+    // =================================================================
+    // 1. FUNGSI PENJUMLAHAN AMAN (Pastikan fungsi ini ada di dalam dispatchWA)
+    // =================================================================
     const penjumblahM = (val) => {
         if (!val) return 0;
-        // Hanya ambil karakter angka. Tanda "-", "NIL", atau spasi akan dibuang menjadi ""
         const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
         return hanyaAngka === '' ? 0 : Number(hanyaAngka);
     };
 
-    // 3. HITUNG MENGGUNAKAN VARIABEL YANG SUDAH DIAMBIL DI ATAS
-    // Cara ini jauh lebih aman karena tidak menembak DOM berulang kali
+    // =================================================================
+    // 2. PROSES HITUNG DATA (CREW, PAX, POB, & FUEL)
+    // =================================================================
     const crew = penjumblahM(crewC) + penjumblahM(crewFa) + penjumblahM(crewEng);
     const pax = penjumblahM(paxA) + penjumblahM(paxI) + penjumblahM(paxC);
     const pob = crew + pax;
-	
-	
+
+    // Bersihkan data fuelUplift agar murni menjadi angka saja untuk pengecekan > 0
+    const fuelAngka = fuelUplift ? Number(fuelUplift.toString().replace(/[^0-9]/g, '')) : 0;
+    
+    // Jika angka > 0 maka otomatis ditambah " LTR", jika berupa "-" atau "NIL" tetap cetak teks aslinya
+    const fuelDisplay = fuelAngka > 0 ? `${fuelAngka} LTR` : fuelUplift;
+    // =================================================================
 
 
-    // --- EDIT BLOK KODE IF FORMAT DI BAWAHNYA MENJADI SEPERTI INI ---
+    // =================================================================
+    // 3. LOGIKA GENERATE FORMAT CHAT WHATSAPP
+    // =================================================================
     if (formatType === 'A') {
         textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'B') {
-        // Menggunakan variabel crew, pax, dan pob yang sudah dihitung di atas
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+        // Menggunakan variabel ${fuelDisplay} yang sudah diatur otomatis satuannya
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelDisplay}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'C') {
-        // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        // Format C juga ikut menggunakan variabel ${fuelDisplay} otomatis, ditaruh sebelum baris CPT
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nFUEL UPLIFT ${fuelDisplay}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
 
     // 2. Send to Google Sheets
