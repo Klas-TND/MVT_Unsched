@@ -790,11 +790,13 @@ function handleDateSelect(val) {
 }
 
 function updateDefaultFlightNumber() {
-    const dInput = document.getElementById('flightDate').value;
+    const dInput = document.getElementById('flightDate').value; // Contoh isi: "2026-06-14"
     const acRegVal = document.getElementById('acReg').value;
     if (!dInput) return;
 
-    const dayStr = dInput.split('-');
+    // Tambahkan di ujung untuk mengambil elemen ke-3 (yaitu DD / Tanggal)
+    const dayStr = dInput.split('-'); 
+    
     const acRegCleaned = acRegVal.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
     document.getElementById('fltNumber').value = `${dayStr}.${acRegCleaned}`;
 }
