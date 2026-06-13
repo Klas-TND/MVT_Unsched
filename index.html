@@ -1054,8 +1054,31 @@ let activeInputTarget = null;
             textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
         }
         else if (formatType === 'B') {
-            textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crewC}\nPAX ${paxA}\nPOB ${crewC}\nBGe ${cargoBge}\nCGo ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
-        }
+    // 1. Konversi ke Number dan Jumlahkan untuk menghindari error penggabungan string
+    const crew = Number(crewC || 0) + Number(crewFA || 0) + Number(crewEng || 0);
+    const pax = Number(paxA || 0) + Number(paxI || 0) + Number(paxC || 0);
+    const pob = crew + pax;
+
+    // 2. Output template dengan backtick yang sudah diperbaiki (tanpa escape backslash di ujung)
+    textOutput = `\`\`\`
+DEP MVT
+${dateStr}
+${acReg}/${fltNum}
+AD  ${zAtd}/${zTo}
+EET ${eet} HRS
+EA  ${etaZStr} ${routeDest}
+CRW ${crew}
+PAX ${pax}
+POB ${pob}
+BGe ${cargoBge}
+CGo ${cargoCgo}
+FUEL UPLIFT ${fuelUplift}
+CPT ${pic}
+SI  ${si}
+END
+\`\`\``;
+}
+
         else if (formatType === 'C') {
             textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
         }
