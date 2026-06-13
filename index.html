@@ -1074,7 +1074,7 @@ let activeInputTarget = null;
         textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelDisplay}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'C') {
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nFUEL UPLIFT ${fuelDisplay}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
 
 	const payload = {
