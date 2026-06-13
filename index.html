@@ -1109,52 +1109,333 @@ let activeInputTarget = null;
     function showToast(message) {
         const toast = document.getElementById('toastNotification');
         toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
+<script>
+let activeInputTarget = null;
+const suggestionsData = {
+    'acReg': ['MPTGG', 'T758GH', 'VPCLL', 'PKKAS'],
+    'picName': ['ANDREAS SCHMITZ', 'ANDRE GAZOLLA EGOROV', 'CHEVALLIER HERVE MATHIEU'],
+    'routeOrig': ['WSSL', 'WSSS', 'WIHH', 'WIII', 'WARQ', 'WARR'],
+    'routeDest': ['WSSL', 'WSSS', 'WIHH', 'WIII', 'WARQ', 'WARR'],
+    'fuelUplift': ['NIL'], 'paxA': ['NIL'], 'paxI': ['NIL'], 'paxC': ['NIL'],
+    'cargoBge': ['NIL'], 'cargoCgo': ['NIL'], 'siInfo': ['NIL'],
+    'stationName' : ['KOE (Kupang)', 'LBJ (Labuan Bajo)', 'WGP (Waingapu)', 
+    'ENE (Ende)', 'LWE (Lewoleba)', 'ARD (Alor)', 'MOF (Maumere)', 'TMC (Tambolaka)', 
+    'LKA (Larantuka)', 'BJW (Bajawa)', 'RTI (Rote)', 'ABU (Atambua)', 'DHX (Dhoho Kediri)']
+};
 
-    window.addEventListener('click', function(e) {
-        if (e.target === timePickerModal) closeApronPicker();
-        if (e.target === zoomInputModal) closeZoomModal();
-        if (e.target === waModal) closeWAModal();
+const timePickerModal = document.getElementById('timePickerModal');
+const zoomInputModal = document.getElementById('zoomInputModal');
+const waModal = document.getElementById('waModal');
+const zoomModalInput = document.getElementById('zoomModalInput');
+const suggestionsWrapper = document.getElementById('suggestionsWrapper');
+const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+window.onload = function() {
+    setDefaultDate();
+    calculateAllMetrics();
+    setupZoomMechanics();
+};
+
+function showToast(message) {
+    const toast = document.getElementById('toastNotification');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 3000);
+}
+
+function formatDateToMnemonic(isoString) {
+    if (!isoString) return "";
+    const parts = isoString.split('-');
+    if (parts.length !== 3) return "";
+    
+    const yyyy = parts;
+    const mm = parseInt(parts, 10) - 1;
+    const dd = parts;
+    
+    if (isNaN(mm) || mm < 0 || mm > 11) return `${dd} --- ${yyyy}`;
+    return `${dd} ${monthNames[mm]} ${yyyy}`;
+}
+
+function setDefaultDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    const isoDate = `${yyyy}-${mm}-${dd}`;
+    document.getElementById('flightDate').value = isoDate;
+    document.getElementById('flightDateDisplay').value = formatDateToMnemonic(isoDate);
+
+    updateDefaultFlightNumber();
+}
+
+function handleDateSelect(val) {
+    if (!val) return;
+    document.getElementById('flightDateDisplay').value = formatDateToMnemonic(val);
+    document.getElementById('flightDate').value = val;
+    updateDefaultFlightNumber();
+    calculateAllMetrics();
+}
+
+function updateDefaultFlightNumber() {
+    const dInput = document.getElementById('flightDate').value;
+    const acRegVal = document.getElementById('acReg').value;
+    if (!dInput) return;
+
+    const dayStr = dInput.split('-');
+    const acRegCleaned = acRegVal.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    document.getElementById('fltNumber').value = `${dayStr}.${acRegCleaned}`;
+}
+
+function setupZoomMechanics() {
+    document.querySelectorAll('.zoom-trigger').forEach(input => {
+        input.addEventListener('click', function() {
+            activeInputTarget = this;
+            const labelText = this.closest('.form-group')?.querySelector('label')?.textContent || "Data Field";
+
+            zoomModalLabel.textContent = `${labelText}`;
+            zoomModalInput.value = this.value;
+
+            renderSuggestions(this.value);
+
+            zoomInputModal.style.display = 'flex';
+            setTimeout(() => { zoomModalInput.focus(); zoomModalInput.select(); }, 150);
+        });
     });
 
-
-        const submitBtn = document.getElementById('submitBtn');
-        const statusMsg = document.getElementById('statusMsg');
-
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-
-            // UI State: Loading
-            submitBtn.disabled = true;
-            submitBtn.innerText = 'Sending...';
-
-            const formData = new FormData(form);
-            const params = new URLSearchParams(formData);
-
-            fetch(scriptURL, {
-                method: 'POST',
-                body: params,
-                mode: 'no-cors' // Google Apps Script requires this for cross-origin
-            })
-            .then(() => {
-                statusMsg.textContent = "Message sent successfully!";
-                statusMsg.className = "mt-4 p-3 rounded-lg text-center font-medium bg-green-100 text-green-700 block";
-                form.reset();
-            })
-            .catch(error => {
-                statusMsg.textContent = "Something went wrong. Please try again.";
-                statusMsg.className = "mt-4 p-3 rounded-lg text-center font-medium bg-red-100 text-red-700 block";
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerText = 'Send Message';
-            });
-        });
+    zoomModalInput.addEventListener('input', function() {
+        renderSuggestions(this.value);
+    });
 }
-</script>
+
+function renderSuggestions(query = '') {
+    suggestionsWrapper.innerHTML = '';
+    const fieldId = activeInputTarget ? activeInputTarget.id : null;
+
+    if (!fieldId || !suggestionsData[fieldId]) {
+        suggestionsWrapper.style.display = 'none';
+        return;
+    }
+
+    const items = suggestionsData[fieldId];
+    const filtered = items.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+
+    if (filtered.length === 0) {
+        suggestionsWrapper.style.display = 'none';
+        return;
+    }
+
+    suggestionsWrapper.style.display = 'flex';
+
+    filtered.forEach(val => {
+        const rowItem = document.createElement('div');
+        rowItem.className = 'suggestion-item';
+
+        if (query) {
+            const idx = val.toLowerCase().indexOf(query.toLowerCase());
+            if (idx !== -1) {
+                const before = val.substring(0, idx);
+                const match = val.substring(idx, idx + query.length);
+                const after = val.substring(idx + query.length);
+                rowItem.innerHTML = `${before}<span class="suggestion-match">${match}</span>${after}`;
+            } else {
+                rowItem.textContent = val;
+            }
+        } else {
+            rowItem.textContent = val;
+        }
+
+        rowItem.onclick = function() {
+            zoomModalInput.value = val;
+            saveZoomModal();
+        };
+
+        suggestionsWrapper.appendChild(rowItem);
+    });
+}
+
+function closeZoomModal() {
+    zoomInputModal.style.display = 'none';
+    activeInputTarget = null;
+}
+
+function saveZoomModal() {
+    if (activeInputTarget) {
+        activeInputTarget.value = zoomModalInput.value.toUpperCase();
+        if (activeInputTarget.id === 'acReg') {
+            updateDefaultFlightNumber();
+        }
+        calculateAllMetrics();
+        closeZoomModal();
+    }
+}
+
+document.querySelectorAll('.time-trigger').forEach(input => {
+    input.addEventListener('click', function() {
+        activeInputTarget = this;
+        let [h, m] = (this.value === '--:--' || this.value === '') ? ['00', '00'] : this.value.split(':');
+        document.getElementById('apronHour').value = h;
+        document.getElementById('apronMinute').value = m;
+        timePickerModal.style.display = 'flex';
+    });
+});
+
+function setApronTimeToNow() {
+    const now = new Date();
+    document.getElementById('apronHour').value = String(now.getHours()).padStart(2, '0');
+    document.getElementById('apronMinute').value = String(now.getMinutes()).padStart(2, '0');
+}
+
+function closeApronPicker() {
+    timePickerModal.style.display = 'none';
+    activeInputTarget = null;
+}
+
+function saveApronPicker() {
+    if (activeInputTarget) {
+        let h = document.getElementById('apronHour').value.padStart(2, '0');
+        let m = document.getElementById('apronMinute').value.padStart(2, '0');
+
+        if (parseInt(h) >= 0 && parseInt(h) <= 23 && parseInt(m) >= 0 && parseInt(m) <= 59) {
+            activeInputTarget.value = `${h}:${m}`;
+            calculateAllMetrics();
+            closeApronPicker();
+        } else {
+            showToast("Please enter a valid time (00-23 : 00-59)");
+        }
+    }
+}
+
+function parseToMinutes(timeStr) {
+    if(!timeStr || timeStr === '--:--' || timeStr.includes('-')) return null;
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h * 60) + m;
+}
+
+function formatMinutesToHoursStr(totalMinutes) {
+    totalMinutes = ((totalMinutes % 1440) + 1440) % 1440;
+    const h = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+    const m = String(totalMinutes % 60).padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+function calculateAllMetrics() {
+    const offset = parseInt(document.getElementById('utcOffset').value) || 0;
+
+    document.querySelectorAll('.timeline-row').forEach(row => {
+        const startInput = row.querySelector('.lt-start').value;
+        const utcDisplay = row.querySelector('.utc-display');
+        if (!startInput || startInput === '--:--' || startInput === '') {
+            utcDisplay.textContent = "-";
+            return;
+        }
+        let localMinutes = parseToMinutes(startInput);
+        if (localMinutes === null) return;
+        let utcMinutes = localMinutes - (offset * 60);
+        utcDisplay.textContent = formatMinutesToHoursStr(utcMinutes) + "Z";
+    });
+
+    const airborne = parseToMinutes(document.getElementById('time_airborne').value);
+    const eet = parseToMinutes(document.getElementById('eetInput').value);
+
+    if (airborne !== null && eet !== null) {
+        let estLandingMinutesLT = airborne + eet;
+        let estLandingMinutesUTC = estLandingMinutesLT - (offset * 60);
+        let utcStr = formatMinutesToHoursStr(estLandingMinutesUTC) + "Z";
+        document.getElementById('calcEstLanding').textContent = `${utcStr}`;
+    } else {
+        document.getElementById('calcEstLanding').textContent = "--:--";
+    }
+}
+
+function openWhatsAppModal() {
+    document.getElementById('waTargetLabel').textContent = "+" + document.getElementById('waContact').value;
+    waModal.style.display = 'flex';
+}
+
+function closeWAModal() { waModal.style.display = 'none'; }
+
+function getFormattedDateString() {
+    const dInput = document.getElementById('flightDate').value;
+    if(!dInput) return "04 JUN 2026";
+    const [yyyy, mm, dd] = dInput.split('-');
+    return `${dd} ${monthNames[parseInt(mm, 10)-1]} ${yyyy}`;
+}
+
+function dispatchWA(formatType) {
+    const waNum = document.getElementById('waContact').value;
+    const dateStr = getFormattedDateString();
+    const acReg = document.getElementById('acReg').value;
+    const fltNum = document.getElementById('fltNumber').value;
+
+    const zLanding = document.getElementById('utc_landing').textContent.replace(':', '');
+    const zBlockOn = document.getElementById('utc_blockon').textContent.replace(':', '');
+    const zAtd = document.getElementById('utc_atd').textContent.replace(':', '');
+    const ltAtd = document.getElementById('time_atd').value.replace(':', '');
+    const zTo = document.getElementById('utc_airborne').textContent.replace(':', '');
+    const ltTo = document.getElementById('time_airborne').value.replace(':', '');
+    const eet = document.getElementById('eetInput').value.replace(':', '');
+
+    const prkStand = document.getElementById('prkStand').value;
+    const routeDest = document.getElementById('routeDest').value;
+    
+    const crewC = document.getElementById('crewC').value;
+    const crewFa = document.getElementById('crewFa').value; 
+    const crewEng = document.getElementById('crewEng').value;
+    
+    const paxA = document.getElementById('paxA').value;
+    const paxI = document.getElementById('paxI').value;
+    const paxC = document.getElementById('paxC').value;
+    
+    const cargoBge = document.getElementById('cargoBge').value;
+    const cargoCgo = document.getElementById('cargoCgo').value;
+    const fuelUplift = document.getElementById('fuelUplift').value;
+    const pic = document.getElementById('picName').value;
+    const si = document.getElementById('siInfo').value;
+
+    const eetMinutes = parseToMinutes(document.getElementById('eetInput').value) || 0;
+    const airborneMinutes = parseToMinutes(document.getElementById('time_airborne').value) || 0;
+    const offset = parseInt(document.getElementById('utcOffset').value) || 0;
+
+    let etaMinutesLT = airborneMinutes + eetMinutes;
+    let etaMinutesZ = etaMinutesLT - (offset * 60);
+
+    let etaZStr = formatMinutesToHoursStr(etaMinutesZ).replace(':', '') + "Z";
+    let etaLTStr = formatMinutesToHoursStr(etaMinutesLT).replace(':', '') + "LT";
+
+    let textOutput = "";
+
+    const penjumblahM = (val) => {
+        if (!val) return 0;
+        const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
+        return hanyaAngka === '' ? 0 : Number(hanyaAngka);
+    };
+
+    const crew = penjumblahM(crewC) + penjumblahM(crewFa) + penjumblahM(crewEng);
+    const pax = penjumblahM(paxA) + penjumblahM(paxI) + penjumblahM(paxC);
+    const pob = crew + pax;
+
+    const fuelAngka = fuelUplift ? Number(fuelUplift.toString().replace(/[^0-9]/g, '')) : 0;
+    const fuelDisplay = fuelAngka > 0 ? `${fuelAngka} LTR` : fuelUplift;
+
+    if (formatType === 'A') {
+        textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
+    }
+    else if (formatType === 'B') {
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelDisplay}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+    }
+    else if (formatType === 'C') {
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nFUEL UPLIFT ${fuelDisplay}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+    }
+
+    const payload = {
+        date: getFormattedDateString(),
+        acReg: acReg,
+        fltDate: dateStr,
+        report: textOutput 
+    };
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxwOr1S1KR_5D9Jn6TF7DNtTCpTXMuByhTGGO4mnQ64DFbEoRz2W__cn9G-NF88a0Bl/exec';
+
 </body>
 </html>
