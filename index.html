@@ -761,18 +761,15 @@ let activeInputTarget = null;
     }
 
     // Formats any raw 'YYYY-MM-DD' into beautiful 'DD MMM YYYY'
-    Function formatDateToMnemonic(isoString) {
-    if (!isoString) return "";
-
-    const parts = isoString.split('-');
-    if (parts.length !== 3) return "";
-
-    const yyyy = parts[0];
-    const mm = parseInt(parts[1], 10) - 1;
-    const dd = parts[2];
-
-    return `${dd} ${monthNames[mm]} ${yyyy}`;
-}
+    function formatDateToMnemonic(isoString) {
+        if (!isoString) return "";
+        const parts = isoString.split('-');
+        if (parts.length !== 3) return "";
+        const yyyy = parts[0];
+        const mm = parseInt(parts[1]) - 1;
+        const dd = parts[2];
+        return `${dd} ${monthNames[mm]} ${yyyy}`;
+    }
 
     function setDefaultDate() {
         const today = new Date();
@@ -1057,35 +1054,46 @@ let activeInputTarget = null;
 
         let textOutput = "";
 
-/// 2. FUNGSI PENJUMLAHAN AMAN
-    const penjumblahM = (val) => {
-        if (!val) return 0;
-        // Hanya ambil karakter angka. Tanda "-", "NIL", atau spasi akan dibuang menjadi ""
-        const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
-        return hanyaAngka === '' ? 0 : Number(hanyaAngka);
-    };
-
-    // 3. HITUNG MENGGUNAKAN VARIABEL YANG SUDAH DIAMBIL DI ATAS
-    // Cara ini jauh lebih aman karena tidak menembak DOM berulang kali
-    const crew = penjumblahM(crewC) + penjumblahM(crewFa) + penjumblahM(crewEng);
-    const pax = penjumblahM(paxA) + penjumblahM(paxI) + penjumblahM(paxC);
+        // Single line spacing (with backticks for monospace in WhatsApp)
+        if (formatType === 'A') {
+            textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
+        }
+        else if (formatType === 'B') {
+    // 1. Konversi ke Number dan Jumlahkan untuk menghindari error penggabungan string
+    const crew = Number(crewC || 0) + Number(crewFA || 0) + Number(crewEng || 0);
+    const pax = Number(paxA || 0) + Number(paxI || 0) + Number(paxC || 0);
     const pob = crew + pax;
-	
-	
 
+    // 2. Output template dengan backtick yang sudah diperbaiki (tanpa escape backslash di ujung)
+    textOutput = `\`\`\`
+DEP MVT
+${dateStr}
+${acReg}/${fltNum}
+AD  ${zAtd}/${zTo}
+EET ${eet} HRS
+EA  ${etaZStr} ${routeDest}
+CRW ${crew}
+PAX ${pax}
+POB ${pob}
+BGe ${cargoBge}
+CGo ${cargoCgo}
+FUEL UPLIFT ${fuelUplift}
+CPT ${pic}
+SI  ${si}
+END
+\`\`\``;
+}
 
-    // --- EDIT BLOK KODE IF FORMAT DI BAWAHNYA MENJADI SEPERTI INI ---
-    if (formatType === 'A') {
-        textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
-    }
-    else if (formatType === 'B') {
-        // Menggunakan variabel crew, pax, dan pob yang sudah dihitung di atas
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
-    }
-    else if (formatType === 'C') {
-        // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
-    }
+        else if (formatType === 'C') {
+            textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        }
+
+	const payload = {
+        date: getFormattedDateString(),
+        acReg: acReg,
+        fltDate: dateStr,
+        report: textOutput // This sends the exact text you generated for WhatsApp
+    };
 
     // 2. Send to Google Sheets
     // Replace 'YOUR_WEB_APP_URL' with the URL from your Google Apps Script deployment
