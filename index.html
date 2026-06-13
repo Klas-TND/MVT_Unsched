@@ -1111,21 +1111,7 @@ END
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(textOutput)}`, '_blank');
     closeWAModal();
 
-    // Modern custom toast alerts
-    function showToast(message) {
-        const toast = document.getElementById('toastNotification');
-        toast.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
-    }
-
-    window.addEventListener('click', function(e) {
-        if (e.target === timePickerModal) closeApronPicker();
-        if (e.target === zoomInputModal) closeZoomModal();
-        if (e.target === waModal) closeWAModal();
-    });
+    
 
 
         const submitBtn = document.getElementById('submitBtn');
@@ -1161,6 +1147,21 @@ END
             });
         });
 }
+	// Modern custom toast alerts
+    function showToast(message) {
+        const toast = document.getElementById('toastNotification');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+
+    window.addEventListener('click', function(e) {
+        if (e.target === timePickerModal) closeApronPicker();
+        if (e.target === zoomInputModal) closeZoomModal();
+        if (e.target === waModal) closeWAModal();
+    });
 </script>
 </body>
 </html>
