@@ -761,15 +761,18 @@ let activeInputTarget = null;
     }
 
     // Formats any raw 'YYYY-MM-DD' into beautiful 'DD MMM YYYY'
-    function formatDateToMnemonic(isoString) {
-        if (!isoString) return "";
-        const parts = isoString.split('-');
-        if (parts.length !== 3) return "";
-        const yyyy = parts[0];
-        const mm = parseInt(parts[1]) - 1;
-        const dd = parts[2];
-        return `${dd} ${monthNames[mm]} ${yyyy}`;
-    }
+    Function formatDateToMnemonic(isoString) {
+    if (!isoString) return "";
+
+    const parts = isoString.split('-');
+    if (parts.length !== 3) return "";
+
+    const yyyy = parts[0];
+    const mm = parseInt(parts[1], 10) - 1;
+    const dd = parts[2];
+
+    return `${dd} ${monthNames[mm]} ${yyyy}`;
+}
 
     function setDefaultDate() {
         const today = new Date();
