@@ -1011,103 +1011,100 @@ let activeInputTarget = null;
     }
 
     function dispatchWA(formatType) {
-        const waNum = document.getElementById('waContact').value;
-        const dateStr = getFormattedDateString();
-        const acReg = document.getElementById('acReg').value;
-        const fltNum = document.getElementById('fltNumber').value;
+    const waNum = document.getElementById('waContact').value;
+    const dateStr = getFormattedDateString();
+    const acReg = document.getElementById('acReg').value;
+    const fltNum = document.getElementById('fltNumber').value;
 
-        // WHATSAPP REPORT: Remove colons from these fields by using .replace(':', '')
-        const zLanding = document.getElementById('utc_landing').textContent.replace(':', '');
-        const zBlockOn = document.getElementById('utc_blockon').textContent.replace(':', '');
-        const zAtd = document.getElementById('utc_atd').textContent.replace(':', '');
-		const ltAtd = document.getElementById('time_atd').value.replace(':', '');
-		const zTo = document.getElementById('utc_airborne').textContent.replace(':', '');
-		const ltTo = document.getElementById('time_airborne').textContent.replace(':', '');
-        const eet = document.getElementById('eetInput').value.replace(':', '');
+    const zLanding = document.getElementById('utc_landing').textContent.replace(':', '');
+    const zBlockOn = document.getElementById('utc_blockon').textContent.replace(':', '');
+    const zAtd = document.getElementById('utc_atd').textContent.replace(':', '');
+    const ltAtd = document.getElementById('time_atd').value.replace(':', '');
+    const zTo = document.getElementById('utc_airborne').textContent.replace(':', '');
+    const ltTo = document.getElementById('time_airborne').value.replace(':', '');
+    const eet = document.getElementById('eetInput').value.replace(':', '');
 
-        const prkStand = document.getElementById('prkStand').value;
-        const routeDest = document.getElementById('routeDest').value;
-        const crewC = document.getElementById('crewC').value;
-		const crewFA = document.getElementById('crewFA').value;
-		const crewEng = document.getElementById('crewEng').value;
-        const paxA = document.getElementById('paxA').value;
-		const paxI = document.getElementById('paxI').value;
-		const paxC = document.getElementById('paxC').value;
-		
-        const cargoBge = document.getElementById('cargoBge').value;
-        const cargoCgo = document.getElementById('cargoCgo').value;
-        const fuelUplift = document.getElementById('fuelUplift').value;
-        const pic = document.getElementById('picName').value;
-        const si = document.getElementById('siInfo').value;
+    const prkStand = document.getElementById('prkStand').value;
+    const routeDest = document.getElementById('routeDest').value;
+    
+    const crewC = document.getElementById('crewC').value;
+    const crewFa = document.getElementById('crewFa').value; 
+    const crewEng = document.getElementById('crewEng').value;
+    
+    const paxA = document.getElementById('paxA').value;
+    const paxI = document.getElementById('paxI').value;
+    const paxC = document.getElementById('paxC').value;
+    
+    const cargoBge = document.getElementById('cargoBge').value;
+    const cargoCgo = document.getElementById('cargoCgo').value;
+    const fuelUplift = document.getElementById('fuelUplift').value;
+    const pic = document.getElementById('picName').value;
+    const si = document.getElementById('siInfo').value;
 
-        // ETA calculation
-        const eetMinutes = parseToMinutes(document.getElementById('eetInput').value) || 0;
-        const airborneMinutes = parseToMinutes(document.getElementById('time_airborne').value) || 0;
-        const offset = parseInt(document.getElementById('utcOffset').value) || 0;
+    const eetMinutes = parseToMinutes(document.getElementById('eetInput').value) || 0;
+    const airborneMinutes = parseToMinutes(document.getElementById('time_airborne').value) || 0;
+    const offset = parseInt(document.getElementById('utcOffset').value) || 0;
 
-        let etaMinutesLT = airborneMinutes + eetMinutes;
-        let etaMinutesZ = etaMinutesLT - (offset * 60);
+    let etaMinutesLT = airborneMinutes + eetMinutes;
+    let etaMinutesZ = etaMinutesLT - (offset * 60);
 
-        // WHATSAPP REPORT: Remove colons from ETA fields
-        let etaZStr = formatMinutesToHoursStr(etaMinutesZ).replace(':', '') + "Z";
-        let etaLTStr = formatMinutesToHoursStr(etaMinutesLT).replace(':', '') + "LT";
+    let etaZStr = formatMinutesToHoursStr(etaMinutesZ).replace(':', '') + "Z";
+    let etaLTStr = formatMinutesToHoursStr(etaMinutesLT).replace(':', '') + "LT";
 
-        let textOutput = "";
+    let textOutput = "";
 
-/// 2. FUNGSI PENJUMLAHAN AMAN
+    // 1. FUNGSI PENJUMLAHAN AMAN
     const penjumblahM = (val) => {
         if (!val) return 0;
-        // Hanya ambil karakter angka. Tanda "-", "NIL", atau spasi akan dibuang menjadi ""
         const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
         return hanyaAngka === '' ? 0 : Number(hanyaAngka);
     };
 
-    // 3. HITUNG MENGGUNAKAN VARIABEL YANG SUDAH DIAMBIL DI ATAS
-    // Cara ini jauh lebih aman karena tidak menembak DOM berulang kali
+    // 2. PROSES HITUNG DATA (CREW, PAX, POB)
     const crew = penjumblahM(crewC) + penjumblahM(crewFa) + penjumblahM(crewEng);
     const pax = penjumblahM(paxA) + penjumblahM(paxI) + penjumblahM(paxC);
     const pob = crew + pax;
-	
-	
 
+    // 3. LOGIKA OTOMATIS SATUAN LTR PADA FUEL UPLIFT
+    const fuelAngka = fuelUplift ? Number(fuelUplift.toString().replace(/[^0-9]/g, '')) : 0;
+    const fuelDisplay = fuelAngka > 0 ? `${fuelAngka} LTR` : fuelUplift;
 
-    // --- EDIT BLOK KODE IF FORMAT DI BAWAHNYA MENJADI SEPERTI INI ---
+    // 4. GENERATE FORMAT TEXT
     if (formatType === 'A') {
         textOutput = `\`\`\`\nARR MVT\n${dateStr}\n${acReg}/${fltNum}\nAA ${zLanding}/${zBlockOn}\nSI PRK ${prkStand}-${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'B') {
-        // Menggunakan variabel crew, pax, dan pob yang sudah dihitung di atas
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelUplift}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nAD  ${zAtd}/${zTo}\nEET ${eet} HRS\nEA  ${etaZStr} ${routeDest}\nCRW ${crew}\nPAX ${pax}\nPOB ${pob}\nBGE ${cargoBge}\nCGO ${cargoCgo}\nFUEL UPLIFT ${fuelDisplay}\nCPT ${pic}\nSI  ${si}\nEND\n\`\`\``;
     }
     else if (formatType === 'C') {
-        // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
-        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
+        textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nFUEL UPLIFT ${fuelDisplay}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
 
-		const payload = {
+    const payload = {
         date: getFormattedDateString(),
         acReg: acReg,
         fltDate: dateStr,
         report: textOutput 
     };
 
-    
-    // 2. Send to Google Sheets
-    // Replace 'YOUR_WEB_APP_URL' with the URL from your Google Apps Script deployment
-	const scriptURL = 'https://script.google.com/macros/s/AKfycbxwOr1S1KR_5D9Jn6TF7DNtTCpTXMuByhTGGO4mnQ64DFbEoRz2W__cn9G-NF88a0Bl/exec'; 
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxwOr1S1KR_5D9Jn6TF7DNtTCpTXMuByhTGGO4mnQ64DFbEoRz2W__cn9G-NF88a0Bl/exec'; 
 
-	fetch(scriptURL, {
-		method: 'POST',
-		mode: 'no-cors', // Penting agar tidak terkena error CORS
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload)
-	})
-	.then(response => console.log("Data terkirim ke Sheet"))
-	.catch(err => console.error("Sheet Error: ", err));
-    // 3. Open WhatsApp and close modal
+    fetch(scriptURL, {
+        method: 'POST',
+        mode: 'no-cors', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => console.log("Data terkirim ke Sheet"))
+    .catch(err => console.error("Sheet Error: ", err));
+
     window.open(`https://wa.me/${waNum}?text=${encodeURIComponent(textOutput)}`, '_blank');
     closeWAModal();
+}
 
+
+
+	
     // Modern custom toast alerts
     function showToast(message) {
         const toast = document.getElementById('toastNotification');
