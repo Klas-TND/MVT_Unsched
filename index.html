@@ -1083,6 +1083,15 @@ let activeInputTarget = null;
         // Ditambahkan informasi CRW, PAX, dan POB yang sudah bersih dari NaN ke Format C
         textOutput = `\`\`\`\nDEP MVT\n${dateStr}\n${acReg}/${fltNum}\nB.OFF ${zAtd}/${ltAtd}\nATD   ${zTo}/${ltTo}\nFLT   ${eet} HRS\nETA   ${etaZStr}/${etaLTStr} ${routeDest}\nCRW   ${crew}\nPAX   ${pax}\nPOB   ${pob}\nCPT   ${pic}\nSI    ${si}\nEND\n\`\`\``;
     }
+
+		const payload = {
+        date: getFormattedDateString(),
+        acReg: acReg,
+        fltDate: dateStr,
+        report: textOutput 
+    };
+
+    
     // 2. Send to Google Sheets
     // Replace 'YOUR_WEB_APP_URL' with the URL from your Google Apps Script deployment
 	const scriptURL = 'https://script.google.com/macros/s/AKfycbxwOr1S1KR_5D9Jn6TF7DNtTCpTXMuByhTGGO4mnQ64DFbEoRz2W__cn9G-NF88a0Bl/exec'; 
