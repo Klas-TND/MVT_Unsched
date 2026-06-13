@@ -1024,28 +1024,20 @@ function dispatchWA(formatType) {
 
     let textOutput = "";
 
-        // --- TARUH INI DI DALAM DISPATCHWA SEBELUM BLOK IF (FORMATTYPE) ---
-    // Pendekatan: Mengambil angka saja. Jika bukan angka, otomatis dianggap 0
+        /// 2. FUNGSI PENJUMLAHAN AMAN
     const penjumblahM = (val) => {
         if (!val) return 0;
-        // Buang semua karakter yang BUKAN angka (seperti "-", "NIL", spasi, dll)
+        // Hanya ambil karakter angka. Tanda "-", "NIL", atau spasi akan dibuang menjadi ""
         const hanyaAngka = val.toString().replace(/[^0-9]/g, '');
-        // Jika kosong kembalikan 0, jika ada angka konversi ke tipe Number
         return hanyaAngka === '' ? 0 : Number(hanyaAngka);
     };
 
-    // Hitung total crew, pax, dan pob secara aman menggunakan fungsi di atas
-    // Pastikan ID 'crewFa' menggunakan huruf 'a' kecil sesuai di HTML Anda
-    const crew = penjumblahM(document.getElementById('crewC')?.value) + 
-                 penjumblahM(document.getElementById('crewFa')?.value) + 
-                 penjumblahM(document.getElementById('crewEng')?.value);
-
-    const pax = penjumblahM(document.getElementById('paxA')?.value) + 
-                penjumblahM(document.getElementById('paxI')?.value) + 
-                penjumblahM(document.getElementById('paxC')?.value);
-
+    // 3. HITUNG MENGGUNAKAN VARIABEL YANG SUDAH DIAMBIL DI ATAS
+    // Cara ini jauh lebih aman karena tidak menembak DOM berulang kali
+    const crew = penjumblahM(crewC) + penjumblahM(crewFa) + penjumblahM(crewEng);
+    const pax = penjumblahM(paxA) + penjumblahM(paxI) + penjumblahM(paxC);
     const pob = crew + pax;
-    // -----------------------------------------------------------------
+	-------------------
 
 
     // --- EDIT BLOK KODE IF FORMAT DI BAWAHNYA MENJADI SEPERTI INI ---
